@@ -1,14 +1,8 @@
+
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <wingdi.h>
 
-void main() {
-	
-
-
-	
-
-}
 
 
 
