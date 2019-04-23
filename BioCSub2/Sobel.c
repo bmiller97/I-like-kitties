@@ -6,7 +6,7 @@
 #include "KernelFilter.h"
 
 
-void Sobel(float** img, int rows, int cols, float** outImg) {
+void S2_sobelFilter(float** img, int rows, int cols, float** outImg) {
 
 	//horizonal filter
 	float x_filter[3][3] = { {-1,0,1},{-1,0,1},{-1,0,1} };
@@ -24,5 +24,15 @@ void Sobel(float** img, int rows, int cols, float** outImg) {
 	//for y = range(0 cols)
 	//	for x = range(0,rows)
 	//		outImg[y][x] = sqrt(xImg[y][x]^2 + yImg[y][x]^2);
+
+	free(xImg);
+	free(yImg);
+
+}
+
+void S2_dilationFilter(float**img, int rows, int cols, float** outImg) {
+
+	float blur_filter[3][3] = { {1,1,1},{1,1,1},{1,1,1} };
+	convolveImg(img, rows, cols, blur_filter, 3, 3, outImg);
 
 }
