@@ -118,6 +118,9 @@
     <ClCompile Include="KernelFilter.c" />
     <ClCompile Include="Sobel.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="KernelFilter.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
