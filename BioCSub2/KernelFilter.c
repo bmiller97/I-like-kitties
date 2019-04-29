@@ -1,15 +1,16 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "KernelFilter.h"
 
 
+void convolveImg(float** img, int rows, int cols, float** filter, int f_rows, int f_cols, float** outImg) 
+{
 
-void convolveImg(float** img, int rows, int cols, float** filter, int f_rows, int f_cols, float** outImg) {
-
-	for (int y = 0; y < rows; y++) {
-		for (int x = 0; x < cols; x++) {
+	for (int y = 0; y < rows; y++) 
+	{
+		for (int x = 0; x < cols; x++) 
+		{
 			//find convolution filter value at location
 			outImg[y][x] = getFilteredVal(img, rows, cols, filter, f_rows, f_cols, x, y);
 		}
