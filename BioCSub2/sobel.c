@@ -3,10 +3,24 @@
 #include <math.h>
 #include "KernelFilter.h"
 
+void S2_sobelFilter(float** img, int rows, int cols, float** outImg);
+void S2_dilationFilter(float**img, int rows, int cols, float** outImg);
+
+
+//#define DISABLE_PRINT
+#ifdef DISABLE_PRINT
+    #define printf(fmt, ...) (0)
+#endif
+
+
+
+
+
+
 //DUMMY MAIN TO TEST
 int main()
 {
-	printf("I'M HERE\n");
+	printf("Start of Main\n");
 
 	FILE *fp;
 	int nRows, nColumns, i, ii;
@@ -15,17 +29,17 @@ int main()
 	//INPUT FILE PROVIDED BY DR. GILAT-SCHMIDT
 	char *fileName;	
 	float **inputImage, **outputImage;			
-	printf("I'M HERE 2\n");
+	printf("Define Variables\n");
 
 
 	//INPUT DIMENSIONS GIVEN BY DR. GILAT-SCHMIDT
 	nRows=304;
 	nColumns=304;
-	printf("I'M HERE 3\n");
+	//printf("I'M HERE 3\n");
 	printf("Columns: %d	Rows: %d\n", nColumns, nRows);
 
 	// LOAD FILE
-	fp = fopen("test_image1.bin","r");
+	fp = fopen("test_image1.bin","rb");
 	outfile = fopen("results.txt", "w");
 
 	// CHECK IT EXISTS
@@ -43,32 +57,35 @@ int main()
 	inputImage = (float**) malloc(nRows * sizeof(float*));
 	outputImage = (float**) malloc(nRows * sizeof(float*));
 	
-	printf("NEW I'M HERE\n");
+	printf("Malloc image Rows\n");
 
-	for (i = 0; i < nRows; i++)
+	//un needed, because buffer mallocs individual rows
+	/*for (i = 0; i < nRows; i++)
 	{
-		inputImage = (float**) malloc(nColumns * sizeof(float));
-		outputImage = (float**) malloc(nColumns * sizeof(float));
-	}
-	printf("NEW I'M HERE 2\n");
+		inputImage[i] = (float*) malloc(nColumns * sizeof(float));
+		outputImage[i] = (float*) malloc(nColumns * sizeof(float));
+	}*/
+	printf("Malloc image Columns\n");
 
 	// GET INPUT ARRAY
-	for (ii = 0; ii < nColumns; ii++)
+	for (ii = 0; ii < nRows; ii++)
 	{
-		for (i = 0; i < nRows; i++)
-		{
-			fscanf(fp, "%f", &inputImage[i][ii]);
-		}
+		
+		//read entire line of buffer instead of by individual float
+		float* buffer = malloc(nColumns * sizeof(float));
+		fread(buffer, sizeof(float), nColumns, fp);
+		inputImage[ii] = buffer;
+		
 	}
 	
 	//CHECK INPUT ARRAY 
 	int n, nn;
 	fprintf(outfile,"Input array:\n");
-	for (nn = 0; nn < nColumns; nn++)
+	for (nn = 0; nn < nRows; nn++)
 	{
-		for (n = 0; n < nRows; n++)
+		for (n = 0; n < nColumns; n++)
 		{
-			fprintf(outfile, "%.1f ", &inputImage[n][nn]);
+			fprintf(outfile, "%.1f ", inputImage[n][nn]);
 		}
 		fprintf(outfile, "\n");
 	}
