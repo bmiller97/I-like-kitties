@@ -4,7 +4,7 @@
 #include "KernelFilter.h"
 
 
-void convolveImg(float** img, int rows, int cols, float** filter, int f_rows, int f_cols, float** outImg) 
+void convolveImg(float** img, int rows, int cols, float* filter, int f_rows, int f_cols, float** outImg) 
 {
 
 	for (int y = 0; y < rows; y++) 
@@ -18,7 +18,7 @@ void convolveImg(float** img, int rows, int cols, float** filter, int f_rows, in
 
 }
 
-float getFilteredVal(float** img, int rows, int cols, float** filter, int f_rows, int f_cols, int x,int y) {
+float getFilteredVal(float** img, int rows, int cols, float* filter, int f_rows, int f_cols, int x,int y) {
 	int center_y = (f_rows) / 2; //the center y value from the filter
 	int center_x = f_cols / 2; //the center x value from the filter
 	int real_x = 0; //the x location being tested from the img
@@ -33,7 +33,7 @@ float getFilteredVal(float** img, int rows, int cols, float** filter, int f_rows
 			if (real_x < 0 || real_x >= cols || real_y < 0 || real_y >= rows)
 				continue;
 
-			out_val += img[real_y][real_x] * filter[i][k];
+			out_val += img[real_y][real_x] * filter[i*f_cols+k];
 		}
 
 	}
