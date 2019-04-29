@@ -7,10 +7,11 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg);
 void S2_dilationFilter(float**img, int rows, int cols, float** outImg);
 
 
-//#define DISABLE_PRINT
-#ifdef DISABLE_PRINT
+#define DISABLE_PRINTF
+#ifdef DISABLE_PRINTF
     #define printf(fmt, ...) (0)
 #endif
+
 
 
 
@@ -59,12 +60,11 @@ int main()
 	
 	printf("Malloc image Rows\n");
 
-	//un needed, because buffer mallocs individual rows
-	/*for (i = 0; i < nRows; i++)
+	//unneeded for input, because buffer mallocs individual rows
+	for (i = 0; i < nRows; i++)
 	{
-		inputImage[i] = (float*) malloc(nColumns * sizeof(float));
 		outputImage[i] = (float*) malloc(nColumns * sizeof(float));
-	}*/
+	}
 	printf("Malloc image Columns\n");
 
 	// GET INPUT ARRAY
@@ -105,8 +105,9 @@ int main()
 //		fprintf(outfile, "\n");
 //	}
 
+
 	//Dilation Filter
-	S2_dilationFilter(inputImage, nRows, nColumns, outputImage);
+	S2_dilationFilter(outputImage, nRows, nColumns, inputImage);
 
 
 	// EXIT
@@ -120,34 +121,23 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg)
 	FILE *SOBELoutfile;
 	SOBELoutfile = fopen("SOBELresults.txt", "w");
 
-	//horizonal filter
+	//horizontal and vertical filters
 	float x_filter[3][3] = { {-1,0,1},{-1,0,1},{-1,0,1} };
-
-	//CHECK X-FILTER ARRAY 
-	int i, ii;
-	printf("X-FILTER array:\n");
-	for (ii = 0; ii < 3; ii++)
-	{
-		for (i = 0; i < 3; i++)
-		{
-			printf("%.1f ", x_filter[i][ii]);
-		}
-		printf( "\n");
-	}
 	float y_filter[3][3] = { {-1,-1,-1},{0,0,0},{1,1,1} };
-	
-	//CHECK Y-FILTER ARRAY
-	printf("Y-FILTER array:\n");
-	for (ii = 0; ii < 3; ii++)
-	{
-		for (i = 0; i < 3; i++)
-		{
-			printf("%.1f ", x_filter[i][ii]);
-		}
-		printf( "\n");
+
+	//Initialize xImg and yImg
+	int i =0, ii = 0;
+	int r_size = sizeof(float*)*rows;
+	float** xImg = malloc(r_size);
+	float** yImg = malloc(r_size);
+	int c_size = sizeof(float)*cols;
+	for (i = 0; i < rows; i++) {
+		xImg[i] = malloc(c_size);
+		yImg[i] = malloc(c_size);
 	}
-	float** xImg = malloc(sizeof(float)*rows*cols);
-	float** yImg = malloc(sizeof(float)*rows*cols);
+
+
+
 	
 	//find horizontal (x) filter
 	convolveImg(img, rows, cols, x_filter, 3, 3, xImg);
@@ -155,11 +145,11 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg)
 	//CHECK X-IMAGE ARRAY
 	int n, nn;
 	fprintf(SOBELoutfile,"X-IMAGE:\n");
-	for (nn = 0; nn < cols; nn++)
+	for (nn = 0; nn < rows; nn++)
 	{
-		for (n = 0; n < rows; n++)
+		for (n = 0; n < cols; n++)
 		{
-			fprintf(SOBELoutfile, "%.1f ", xImg[i][ii]);
+			fprintf(SOBELoutfile, "%.1f ", xImg[nn][n]);
 		}
 		fprintf(SOBELoutfile, "\n");
 	}
@@ -171,11 +161,11 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg)
 	
 	//CHECK Y-IMAGE ARRAY
 	fprintf(SOBELoutfile,"Y-IMAGE:\n");
-	for (nn = 0; nn < cols; nn++)
+	for (nn = 0; nn < rows; nn++)
 	{
-		for (n = 0; n < rows; n++)
+		for (n = 0; n < cols; n++)
 		{
-			fprintf(SOBELoutfile, "%.1f ", yImg[i][ii]);
+			fprintf(SOBELoutfile, "%.1f ", yImg[nn][n]);
 		}
 		fprintf(SOBELoutfile, "\n");
 	}
@@ -184,10 +174,17 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg)
 	//for y = range(0 cols)
 	//	for x = range(0,rows)
 	//		outImg[y][x] = sqrt(xImg[y][x]^2 + yImg[y][x]^2);
+	for (ii = 0; ii < rows; ii++) {
+		for (i = 0; i < cols; i++) {
+			float xVal = xImg[ii][i];
+			float yVal = yImg[ii][i];
+			outImg[ii][i] = sqrtf(xVal * xVal + yVal * yVal);
+		}
+	}
 
 	free(xImg);
 	free(yImg);
-	fclose("SOBELresults.txt");
+	fclose(SOBELoutfile);
 
 }
 
@@ -206,16 +203,16 @@ void S2_dilationFilter(float**img, int rows, int cols, float** outImg)
 	convolveImg(img, rows, cols, blur_filter, 3, 3, outImg);
 	
 	//CHECK Y-IMAGE ARRAY
-	fprintf(DILATIONoutfile,"Y-IMAGE:\n");
-	for (ii = 0; ii < cols; ii++)
+	fprintf(DILATIONoutfile,"DILATION-IMAGE:\n");
+	for (ii = 0; ii < rows; ii++)
 	{
-		for (i = 0; i < rows; i++)
+		for (i = 0; i < cols; i++)
 		{
-			fprintf(DILATIONoutfile, "%.1f ", outImg[i][ii]);
+			fprintf(DILATIONoutfile, "%.1f ", outImg[ii][i]);
 		}
 		fprintf(DILATIONoutfile, "\n");
 	}
-	fclose("DILATIONresults.txt");
+	fclose(DILATIONoutfile);
 
 	
 }
