@@ -84,12 +84,12 @@ int main()
 
 
 	//Dilation Filter
-	S2_dilationFilter(outputImage, nRows, nColumns, inputImage);
+	S2_dilationFilter(inputImage, nRows, nColumns, outputImage);
 	
 	//CHECK DILATION OUTPUT
 	for (ii = 0; ii < nRows; ii++)
 	{
-		fwrite(inputImage[ii], sizeof(float), nColumns, DILATIONoutfile);
+		fwrite(outputImage[ii], sizeof(float), nColumns, DILATIONoutfile);
 
 	}
 	fclose(DILATIONoutfile);
@@ -149,6 +149,18 @@ void S2_dilationFilter(float**img, int rows, int cols, float** outImg)
 
 	//apply blur filter
 	convolveImg(img, rows, cols, blur_filter, 3, 3, outImg);
+
+	//threshold it to 1 or 0
+	for (int ii = 0; ii < rows; ii++) {
+		for (int i = 0; i < cols; i++) {
+			if (outImg[ii][i] >= 1.0f) {
+				outImg[ii][i] = 1.0f;
+			}
+			else {
+				outImg[ii][i] = 0.0f;
+			}
+		}
+	}
 
 	
 }
