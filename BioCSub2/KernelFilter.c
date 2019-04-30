@@ -27,8 +27,8 @@ float getFilteredVal(float** img, int rows, int cols, float* filter, int f_rows,
 
 	for (int i = 0; i < f_rows; i++) {
 		for (int k = 0; k < f_cols; k++) {
-			real_x = x + (center_x - k); //x value to test is offset from center of filter
-			real_y = y + (center_y - i); //y value to test is offset from center of filter
+			real_x = x + (k-center_x); //x value to test is offset from center of filter
+			real_y = y + (i-center_y); //y value to test is offset from center of filter
 			//out of bounds check
 			if (real_x < 0 || real_x >= cols || real_y < 0 || real_y >= rows)
 				continue;
