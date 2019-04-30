@@ -7,43 +7,34 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg);
 void S2_dilationFilter(float**img, int rows, int cols, float** outImg);
 
 
-#define DISABLE_PRINTF
-#ifdef DISABLE_PRINTF
-    #define printf(fmt, ...) (0)
-#endif
-
-
-
-
-
+//#define DISABLE_PRINTF
+//#ifdef DISABLE_PRINTF
+//    #define printf(fmt, ...) (0)
+//#endif
 
 
 //DUMMY MAIN TO TEST
 int main()
 {
-	printf("Start of Main\n");
-
+	// LOAD FILES
 	FILE *fp;
-	int nRows, nColumns, i, ii;
-	FILE *outfile;
+	FILE *DILATIONoutfile;
+	FILE *SOBELoutfile;
+	FILE *INPUT;
+	fp = fopen("test_image2.bin","rb");
+	DILATIONoutfile = fopen("DILATIONresults.bin", "w");
+	SOBELoutfile = fopen("SOBELresults.bin", "w");
+	INPUT= fopen("INPUTimage.bin", "w");
 
-	//INPUT FILE PROVIDED BY DR. GILAT-SCHMIDT
-	char *fileName;	
+	//INITIALIZE VARIABLES
+	int nRows, nColumns, i, ii, n, nn;
 	float **inputImage, **outputImage;			
-	printf("Define Variables\n");
 
-
-	//INPUT DIMENSIONS GIVEN BY DR. GILAT-SCHMIDT
+	//INPUT IMAGE DIMENSIONS
 	nRows=304;
 	nColumns=304;
-	//printf("I'M HERE 3\n");
-	printf("Columns: %d	Rows: %d\n", nColumns, nRows);
 
-	// LOAD FILE
-	fp = fopen("test_image1.bin","rb");
-	outfile = fopen("results.txt", "w");
-
-	// CHECK IT EXISTS
+	// CHECK INPUT FILE EXISTS
 	if (fp == NULL)
 	{
 		printf("File does not exist.\n");
@@ -51,63 +42,76 @@ int main()
 	}
 	else
 	{
-		printf("FILE EXISTS.\n");
+		//printf("INPUT FILE EXISTS.\n");
 	}
-
+	
 	// CREATE INPUT AND OUTPUT ARRAYS
 	inputImage = (float**) malloc(nRows * sizeof(float*));
 	outputImage = (float**) malloc(nRows * sizeof(float*));
 	
-	printf("Malloc image Rows\n");
-
 	//unneeded for input, because buffer mallocs individual rows
 	for (i = 0; i < nRows; i++)
 	{
 		outputImage[i] = (float*) malloc(nColumns * sizeof(float));
 	}
-	printf("Malloc image Columns\n");
 
 	// GET INPUT ARRAY
 	for (ii = 0; ii < nRows; ii++)
 	{
-		
-		//read entire line of buffer instead of by individual float
 		float* buffer = malloc(nColumns * sizeof(float));
 		fread(buffer, sizeof(float), nColumns, fp);
-		inputImage[ii] = buffer;
-		
+		inputImage[ii] = buffer;	
 	}
+
+
+	for(ii=0; ii<nRows; ii++)
+	{
+		for(i=0; i<nColumns; i++)
+		{
+			fscanf(fp, "%.1f", &inputImage[ii][i]);
+		}
+	}	
 	
 	//CHECK INPUT ARRAY 
-	int n, nn;
-	fprintf(outfile,"Input array:\n");
 	for (nn = 0; nn < nRows; nn++)
 	{
 		for (n = 0; n < nColumns; n++)
 		{
-			fprintf(outfile, "%.1f ", inputImage[n][nn]);
+			fprintf(INPUT, "%.1f ", inputImage[nn][n]);
 		}
-		fprintf(outfile, "\n");
+		fprintf(INPUT, "\n");
 	}
-
 
 	// SOBEL FILTER
 	S2_sobelFilter(inputImage, nRows, nColumns, outputImage);
 
-	//CHECK OUTPUT ARRAY 
-//	fprintf(outfile,"\n\nOutput SOBEL array:\n");
-//	for (nn = 0; nn < nColumns; nn++)
-//	{
-//		for (n = 0; n < nRows; n++)
-//		{
-//			fprintf(outfile, "%.1f ", &outputImage[n][nn]);
-//		}
-//		fprintf(outfile, "\n");
-//	}
+	//CHECK SOBEL OUTPUT ARRAY 
+	for (nn = 0; nn < nColumns; nn++)
+	{
+		for (n = 0; n < nRows; n++)
+		{
+			fprintf(SOBELoutfile, "%.1f ", outputImage[n][nn]);
+		}
+		fprintf(SOBELoutfile, "\n");
+	}
 
 
 	//Dilation Filter
 	S2_dilationFilter(outputImage, nRows, nColumns, inputImage);
+	
+	//CHECK DILATION OUTPUT
+	for (ii = 0; ii < nRows; ii++)
+	{
+		for (i = 0; i < nColumns; i++)
+		{
+			fprintf(DILATIONoutfile, "%.1f ", inputImage[ii][i]);
+		}
+		fprintf(DILATIONoutfile, "\n");
+	}
+	fclose(DILATIONoutfile);
+	fclose(SOBELoutfile);
+	fclose(INPUT);
+	fclose(fp);
 
 
 	// EXIT
@@ -116,16 +120,12 @@ int main()
 
 void S2_sobelFilter(float** img, int rows, int cols, float** outImg) 
 {
-	printf("SOBEL I'M HERE\n");
 
-	FILE *SOBELoutfile;
-	SOBELoutfile = fopen("SOBELresults.txt", "w");
-
-	//horizontal and vertical filters
+	//make horizontal and vertical filters
 	float x_filter[3][3] = { {-1,0,1},{-1,0,1},{-1,0,1} };
 	float y_filter[3][3] = { {-1,-1,-1},{0,0,0},{1,1,1} };
 
-	//Initialize xImg and yImg
+	//initialize xImg and yImg
 	int i =0, ii = 0;
 	int r_size = sizeof(float*)*rows;
 	float** xImg = malloc(r_size);
@@ -136,44 +136,14 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg)
 		yImg[i] = malloc(c_size);
 	}
 
-
-
-	
 	//find horizontal (x) filter
 	convolveImg(img, rows, cols, x_filter, 3, 3, xImg);
-	printf("SOBEL I'M HERE 2");
-	//CHECK X-IMAGE ARRAY
-	int n, nn;
-	fprintf(SOBELoutfile,"X-IMAGE:\n");
-	for (nn = 0; nn < rows; nn++)
-	{
-		for (n = 0; n < cols; n++)
-		{
-			fprintf(SOBELoutfile, "%.1f ", xImg[nn][n]);
-		}
-		fprintf(SOBELoutfile, "\n");
-	}
 
-	printf("SOBEL I'M HERE 3");
 
 	//find vertical (y) filter
 	convolveImg(img, rows, cols, y_filter, 3, 3, yImg);
 	
-	//CHECK Y-IMAGE ARRAY
-	fprintf(SOBELoutfile,"Y-IMAGE:\n");
-	for (nn = 0; nn < rows; nn++)
-	{
-		for (n = 0; n < cols; n++)
-		{
-			fprintf(SOBELoutfile, "%.1f ", yImg[nn][n]);
-		}
-		fprintf(SOBELoutfile, "\n");
-	}
-//Was this supposed to have been completed??
-	//combine filters
-	//for y = range(0 cols)
-	//	for x = range(0,rows)
-	//		outImg[y][x] = sqrt(xImg[y][x]^2 + yImg[y][x]^2);
+	//COMBINE X AND Y FILTERS
 	for (ii = 0; ii < rows; ii++) {
 		for (i = 0; i < cols; i++) {
 			float xVal = xImg[ii][i];
@@ -184,35 +154,17 @@ void S2_sobelFilter(float** img, int rows, int cols, float** outImg)
 
 	free(xImg);
 	free(yImg);
-	fclose(SOBELoutfile);
 
 }
 
 void S2_dilationFilter(float**img, int rows, int cols, float** outImg) 
 {
-	printf("DILATION I'M HERE\n");
 
-	FILE *DILATIONoutfile;
-	DILATIONoutfile = fopen("DILATIONresults.txt", "w");
-
+	//make blur filter
 	float blur_filter[3][3] = { {1,1,1},{1,1,1},{1,1,1} };
-	
-	//CHECK BLUR FILTER
-	int i, ii;
 
+	//apply blur filter
 	convolveImg(img, rows, cols, blur_filter, 3, 3, outImg);
-	
-	//CHECK Y-IMAGE ARRAY
-	fprintf(DILATIONoutfile,"DILATION-IMAGE:\n");
-	for (ii = 0; ii < rows; ii++)
-	{
-		for (i = 0; i < cols; i++)
-		{
-			fprintf(DILATIONoutfile, "%.1f ", outImg[ii][i]);
-		}
-		fprintf(DILATIONoutfile, "\n");
-	}
-	fclose(DILATIONoutfile);
 
 	
 }
