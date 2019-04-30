@@ -22,9 +22,9 @@ int main()
 	FILE *SOBELoutfile;
 	FILE *INPUT;
 	fp = fopen("test_image2.bin","rb");
-	DILATIONoutfile = fopen("DILATIONresults.bin", "w");
-	SOBELoutfile = fopen("SOBELresults.bin", "w");
-	INPUT= fopen("INPUTimage.bin", "w");
+	DILATIONoutfile = fopen("DILATIONresults.bin", "wb");
+	SOBELoutfile = fopen("SOBELresults.bin", "wb");
+	INPUT= fopen("INPUTimage.bin", "wb");
 
 	//INITIALIZE VARIABLES
 	int nRows, nColumns, i, ii, n, nn;
@@ -63,23 +63,13 @@ int main()
 		inputImage[ii] = buffer;	
 	}
 
-
-	for(ii=0; ii<nRows; ii++)
-	{
-		for(i=0; i<nColumns; i++)
-		{
-			fscanf(fp, "%.1f", &inputImage[ii][i]);
-		}
-	}	
 	
 	//CHECK INPUT ARRAY 
 	for (nn = 0; nn < nRows; nn++)
-	{
-		for (n = 0; n < nColumns; n++)
-		{
-			fprintf(INPUT, "%.1f ", inputImage[nn][n]);
-		}
-		fprintf(INPUT, "\n");
+	{		
+		fwrite(inputImage[nn], sizeof(float), nColumns, INPUT);
+		
+		//fprintf(INPUT, "\n");
 	}
 
 	// SOBEL FILTER
@@ -88,11 +78,8 @@ int main()
 	//CHECK SOBEL OUTPUT ARRAY 
 	for (nn = 0; nn < nColumns; nn++)
 	{
-		for (n = 0; n < nRows; n++)
-		{
-			fprintf(SOBELoutfile, "%.1f ", outputImage[n][nn]);
-		}
-		fprintf(SOBELoutfile, "\n");
+		fwrite(outputImage[nn], sizeof(float), nColumns, SOBELoutfile);
+
 	}
 
 
@@ -102,11 +89,8 @@ int main()
 	//CHECK DILATION OUTPUT
 	for (ii = 0; ii < nRows; ii++)
 	{
-		for (i = 0; i < nColumns; i++)
-		{
-			fprintf(DILATIONoutfile, "%.1f ", inputImage[ii][i]);
-		}
-		fprintf(DILATIONoutfile, "\n");
+		fwrite(inputImage[ii], sizeof(float), nColumns, DILATIONoutfile);
+
 	}
 	fclose(DILATIONoutfile);
 	fclose(SOBELoutfile);
